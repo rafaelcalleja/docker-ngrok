@@ -1,7 +1,7 @@
 FROM            alpine as ngrok
 
 RUN             apk add --no-cache --virtual .bootstrap-deps ca-certificates && \
-                wget -O /tmp/ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz && \
+                wget -O /tmp/ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip && \
                 unzip -o /tmp/ngrok.zip -d / && \
                 apk del .bootstrap-deps && \
                 rm -rf /tmp/* && \
