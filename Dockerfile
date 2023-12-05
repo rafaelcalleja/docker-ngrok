@@ -1,4 +1,4 @@
-ARG BASE_IMAGE="ubuntu:20.04"
+ARG BASE_IMAGE="ubuntu:22.04"
 ARG BUILDER_IMAGE="golang:1.21-bullseye"
 FROM $BUILDER_IMAGE as packer
 
@@ -10,10 +10,7 @@ RUN git clone https://github.com/89luca89/pakkero && \
     unzip -o /tmp/ngrok.zip -d / && \
     dist/pakkero -file /ngrok -c -o /bin/ngrok -enable-stdout -register-dep /bin/bash;
 
-SHELL ["/bin/bash", "-c"]
-RUN /bin/ngrok --version
-
-ARG BASE_IMAGE="ubuntu:20.04"
+ARG BASE_IMAGE="ubuntu:22.04"
 FROM $BASE_IMAGE
 
 LABEL           maintainer="Dmitry Shkoliar @shkoliar"
