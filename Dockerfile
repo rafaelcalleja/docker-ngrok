@@ -1,28 +1,33 @@
-FROM            alpine as ngrok
+ARG BASE_IMAGE="ubuntu:20.04"
+ARG BUILDER_IMAGE="golang:1.21-bullseye"
+FROM $BUILDER_IMAGE as packer
 
-RUN             apk add --no-cache --virtual .bootstrap-deps ca-certificates && \
-                wget -O /tmp/ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip && \
-                unzip -o /tmp/ngrok.zip -d / && \
-                apk del .bootstrap-deps && \
-                rm -rf /tmp/* && \
-                rm -rf /var/cache/apk/*
+RUN git clone https://github.com/89luca89/pakkero && \
+    cd pakkero/ && sed -i 's/-i //g' Makefile && make && apt update && apt-get install -y xz-utils git make binutils coreutils unzip && \
+    wget https://github.com/upx/upx/releases/download/v4.2.1/upx-4.2.1-amd64_linux.tar.xz && \
+    tar xvf upx-4.2.1-amd64_linux.tar.xz && mv upx-4.2.1-amd64_linux/upx /usr/local/bin && \
+    wget -O /tmp/ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip && \
+    unzip -o /tmp/ngrok.zip -d / && \
+    dist/pakkero -file /ngrok -c -o /bin/ngrok -enable-stdout -register-dep /bin/bash;
 
-FROM            busybox:glibc
+SHELL ["/bin/bash", "-c"]
+RUN /bin/ngrok --version
+
+FROM $BASE_IMAGE
 
 LABEL           maintainer="Dmitry Shkoliar @shkoliar"
 
-COPY            --from=ngrok /ngrok /bin/ngrok
-COPY            start.sh /
-        
-RUN             mkdir -p /home/ngrok /home/ngrok/.ngrok2 && \
-                        printf 'web_addr: 0.0.0.0:4551' > /home/ngrok/.ngrok2/ngrok.yml && \
-                        addgroup -g 4551 -S ngrok && \
-                adduser -u 4551 -S ngrok -G ngrok -h /home/ngrok -s /bin/ash && \
-                        chown -R ngrok:ngrok /home/ngrok && \
-                chmod +x /start.sh
+COPY            --from=packer /bin/ngrok /bin/ngrok
 
-USER            ngrok:ngrok
+COPY            start.sh /
+
+RUN             chmod +x /start.sh
+
+RUN useradd -m -u 1000 ngrok
+
+USER            ngrok
 
 EXPOSE          4551
 
 ENTRYPOINT      ["/start.sh"]
+SHELL ["/bin/bash", "-c"]

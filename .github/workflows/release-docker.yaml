@@ -2,15 +2,29 @@ name: release-docker
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - 'v*.*.*'
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
   build-docker-images:
     env:
       GITHUB_REPOSITORY: rafaelcalleja/docker-ngrok
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+          - BASE_IMAGE: ubuntu:20.04
+            BUILDER_IMAGE: golang:1.21-bullseye
+            IMAGE_TAG: 1-21-eye-ubu-20-04
+          - BASE_IMAGE: ubuntu:22.04
+            BUILDER_IMAGE: golang:1.21-bullseye
+            IMAGE_TAG: 1-21-eye-ubu-22-04
+          - BASE_IMAGE: debian:bookworm
+            BUILDER_IMAGE: golang:1.21-bookworm
+            IMAGE_TAG: 1-21-boo-deb-boo
+          - BASE_IMAGE: debian:bullseye
+            BUILDER_IMAGE: golang:1.21-bullseye
+            IMAGE_TAG: 1-21-eye-debian
     steps:
       -
         name: Checkout
@@ -35,5 +49,5 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm/v7,linux/arm64/v8
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.GITHUB_REPOSITORY }}:latest
+          tags: ${{ env.GITHUB_REPOSITORY }}:${{ matrix.IMAGE_TAG }}
           labels: ${{ steps.docker_meta.outputs.labels }}

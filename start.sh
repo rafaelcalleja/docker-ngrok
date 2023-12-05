@@ -1,6 +1,6 @@
-#!/bin/sh -e
+#!/bin/bash
 
-CMD="ngrok"
+CMD="/bin/ngrok"
 
 $CMD authtoken ${AUTH_TOKEN:-''} > /dev/null
 
@@ -49,5 +49,5 @@ else
     fi
 fi
 
-set -x
-exec $CMD
+$CMD
+exit $?
