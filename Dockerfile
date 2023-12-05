@@ -13,6 +13,7 @@ RUN git clone https://github.com/89luca89/pakkero && \
 SHELL ["/bin/bash", "-c"]
 RUN /bin/ngrok --version
 
+ARG BASE_IMAGE="ubuntu:20.04"
 FROM $BASE_IMAGE
 
 LABEL           maintainer="Dmitry Shkoliar @shkoliar"
